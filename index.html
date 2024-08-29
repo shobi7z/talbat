@@ -2,417 +2,223 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة الطلبات</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&display=swap">
+    <title> إدخال المنتجات المكررة</title>
+    <!-- تضمين خط Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Firebase Configuration -->
+    <script type="module">
+        // استيراد وحدات Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+
+        // إعداد Firebase - يجب عليك استبدال هذه المعلومات بمعلومات مشروعك الخاص
+        const firebaseConfig = {
+  apiKey: "AIzaSyA8REbmJrO7jRXhWiKYzUY5fEKUbwu0Q7c",
+  authDomain: "dupeel.firebaseapp.com",
+  databaseURL: "https://dupeel-default-rtdb.firebaseio.com",
+  projectId: "dupeel",
+  storageBucket: "dupeel.appspot.com",
+  messagingSenderId: "887640383214",
+  appId: "1:887640383214:web:6fad12ebbc4ca311519dff",
+  measurementId: "G-KFRJ2VZ3QH"
+        };
+
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // دالة لإضافة الشحنة إلى Firestore
+        function addShipment(event) {
+            event.preventDefault(); // منع إعادة تحميل الصفحة
+
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const products = [];
+
+            for (let i = 1; i <= 10; i++) {
+                const productLink = document.getElementById(`productLink${i}`).value;
+                const quantity = document.getElementById(`quantity${i}`).value;
+                if (productLink && quantity) {
+                    products.push({ link: productLink, quantity: parseInt(quantity) });
+                }
+            }
+
+            // إضافة البيانات إلى Firestore
+            addDoc(collection(db, "shipments"), {
+                trackingNumber: trackingNumber,
+                products: products,
+                createdAt: serverTimestamp()
+            })
+            .then(() => {
+                alert('تم إضافة الشحنة بنجاح!');
+                document.querySelector('form').reset(); // إعادة تعيين النموذج بعد الإضافة
+            })
+            .catch(error => {
+                console.error('خطأ في إضافة الشحنة: ', error);
+            });
+        }
+        
+        // ربط دالة إضافة الشحنة بالنموذج عند تحميل الصفحة
+        window.onload = function() {
+            document.querySelector('form').onsubmit = addShipment;
+        };
+    </script>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: #f4f4f9;
+            padding: 20px;
+            margin: 0;
         }
         .container {
-            width: 80%;
-            margin: 2rem auto;
-            padding: 1.5rem;
+            max-width: 700px;
+            margin: 30px auto;
             background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-        h1 {
+        h2 {
             text-align: center;
             color: #333;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        #openModalBtn {
-            background-color: #007bff;
-            color: #fff;
-        }
-        #openModalBtn:hover {
-            background-color: #0056b3;
-        }
-        .order-item {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .order-item p {
-            margin: 5px 0;
-        }
-        .btn-container {
-            margin-top: 10px;
-        }
-        .btn {
-            padding: 10px 15px;
-            border-radius: 5px;
-            color: #fff;
-            font-size: 14px;
-            text-align: center;
-            transition: background-color 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-edit {
-            background-color: #007bff;
-        }
-        .btn-edit:hover {
-            background-color: #0056b3;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-        }
-        .btn-delete:hover {
-            background-color: #c82333;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 600px;
-            position: relative;
-        }
-        .modal .close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 18px;
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 15px;
         }
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 5px;
-            color: #333;
+            color: #555;
+            font-weight: 600;
         }
-        .form-group input,
-        .form-group select {
-            width: 100%;
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 16px);
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        .modal-content h2 {
-            margin-top: 0;
-            color: #007bff;
-        }
-        .modal-content button {
-            margin-top: 10px;
-        }
-        #ordersContainer {
-            max-height: 500px; /* تعيين الارتفاع الأقصى للحاوية */
-            overflow-y: auto; /* إظهار شريط التمرير عند الحاجة */
-            margin-top: 20px;
-            padding: 10px;
+            margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #4CAF50;
+        }
+        button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>إدارة الطلبات</h1>
-        <button id="openModalBtn">إضافة طلب جديد</button>
-        <div id="ordersContainer"></div>
+        <h2> المنتجات المكررة​</h2>
+        <form>
+            <!-- خانة إدخال رقم الشحنة -->
+            <div class="form-group">
+                <label for="trackingNumber">رقم الشحنة</label>
+                <input type="text" id="trackingNumber" name="trackingNumber" required>
+            </div>
+
+            <!-- خانات إدخال الروابط والكميات للمنتجات -->
+            <!-- المنتج 1 -->
+            <div class="form-group">
+                <label for="productLink1">رابط المنتج الأول</label>
+                <input type="text" id="productLink1" name="productLink1">
+                <label for="quantity1">الكمية</label>
+                <input type="number" id="quantity1" name="quantity1" min="0">
+            </div>
+
+            <!-- المنتج 2 -->
+            <div class="form-group">
+                <label for="productLink2">رابط المنتج الثاني</label>
+                <input type="text" id="productLink2" name="productLink2">
+                <label for="quantity2">الكمية</label>
+                <input type="number" id="quantity2" name="quantity2" min="0">
+            </div>
+
+            <!-- المنتج 3 -->
+            <div class="form-group">
+                <label for="productLink3">رابط المنتج الثالث</label>
+                <input type="text" id="productLink3" name="productLink3">
+                <label for="quantity3">الكمية</label>
+                <input type="number" id="quantity3" name="quantity3" min="0">
+            </div>
+
+            <!-- المنتج 4 -->
+            <div class="form-group">
+                <label for="productLink4">رابط المنتج الرابع</label>
+                <input type="text" id="productLink4" name="productLink4">
+                <label for="quantity4">الكمية</label>
+                <input type="number" id="quantity4" name="quantity4" min="0">
+            </div>
+
+            <!-- المنتج 5 -->
+            <div class="form-group">
+                <label for="productLink5">رابط المنتج الخامس</label>
+                <input type="text" id="productLink5" name="productLink5">
+                <label for="quantity5">الكمية</label>
+                <input type="number" id="quantity5" name="quantity5" min="0">
+            </div>
+
+            <!-- المنتج 6 -->
+            <div class="form-group">
+                <label for="productLink6">رابط المنتج السادس</label>
+                <input type="text" id="productLink6" name="productLink6">
+                <label for="quantity6">الكمية</label>
+                <input type="number" id="quantity6" name="quantity6" min="0">
+            </div>
+
+            <!-- المنتج 7 -->
+            <div class="form-group">
+                <label for="productLink7">رابط المنتج السابع</label>
+                <input type="text" id="productLink7" name="productLink7">
+                <label for="quantity7">الكمية</label>
+                <input type="number" id="quantity7" name="quantity7" min="0">
+            </div>
+
+            <!-- المنتج 8 -->
+            <div class="form-group">
+                <label for="productLink8">رابط المنتج الثامن</label>
+                <input type="text" id="productLink8" name="productLink8">
+                <label for="quantity8">الكمية</label>
+                <input type="number" id="quantity8" name="quantity8" min="0">
+            </div>
+
+            <!-- المنتج 9 -->
+            <div class="form-group">
+                <label for="productLink9">رابط المنتج التاسع</label>
+                <input type="text" id="productLink9" name="productLink9">
+                <label for="quantity9">الكمية</label>
+                <input type="number" id="quantity9" name="quantity9" min="0">
+            </div>
+
+            <!-- المنتج 10 -->
+            <div class="form-group">
+                <label for="productLink10">رابط المنتج العاشر</label>
+                <input type="text" id="productLink10" name="productLink10">
+                <label for="quantity10">الكمية</label>
+                <input type="number" id="quantity10" name="quantity10" min="0">
+            </div>
+
+            <!-- زر إرسال النموذج -->
+            <button type="submit">إرسال</button>
+        </form>
     </div>
-
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>إضافة طلب جديد</h2>
-            <form id="orderForm">
-                <div class="form-group">
-                    <label for="shipmentNumber">رقم الشحنة:</label>
-                    <input type="text" id="shipmentNumber" required>
-                </div>
-                <div class="form-group">
-                    <label for="cartLink">رابط العربة:</label>
-                    <input type="url" id="cartLink" required>
-                </div>
-                <div class="form-group">
-                    <label for="customerAccountLink">رابط حساب الزبون:</label>
-                    <input type="url" id="customerAccountLink" required>
-                </div>
-                <div class="form-group">
-                    <label for="province">المحافظة:</label>
-                    <select id="province" required>
-                        <option value="">اختر المحافظة</option>
-                        <option value="بغداد">بغداد</option>
-                        <option value="البصرة">البصرة</option>
-                        <option value="نينوى">نينوى</option>
-                        <option value="كربلاء">كربلاء</option>
-                        <option value="النجف">النجف</option>
-                        <option value="ذي قار">ذي قار</option>
-                        <option value="أربيل">أربيل</option>
-                        <option value="السليمانية">السليمانية</option>
-                        <option value="دهوك">دهوك</option>
-                        <option value="صلاح الدين">صلاح الدين</option>
-                        <option value="الأنبار">الأنبار</option>
-                        <option value="المثنى">المثنى</option>
-                        <option value="القادسية">القادسية</option>
-                        <option value="بابيل">بابيل</option>
-                        <option value="واسط">واسط</option>
-                        <option value="الميسان">الميسان</option>
-                        <option value="كركوك">كركوك</option>
-                        <option value="ديالى">ديالى</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="address">العنوان:</label>
-                    <input type="text" id="address" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone1">رقم الهاتف الأول:</label>
-                    <input type="tel" id="phone1" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone2">رقم الهاتف الثاني:</label>
-                    <input type="tel" id="phone2">
-                </div>
-                <div class="form-group">
-                    <label for="totalPrice">السعر الكلي:</label>
-                    <input type="number" id="totalPrice" required>
-                </div>
-                <button type="submit" class="btn btn-primary">إضافة الطلب</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>تعديل الطلب</h2>
-            <form id="editForm">
-                <input type="hidden" id="editOrderId">
-                <div class="form-group">
-                    <label for="editShipmentNumber">رقم الشحنة:</label>
-                    <input type="text" id="editShipmentNumber" required>
-                </div>
-                <div class="form-group">
-                    <label for="editCartLink">رابط العربة:</label>
-                    <input type="url" id="editCartLink" required>
-                </div>
-                <div class="form-group">
-                    <label for="editCustomerAccountLink">رابط حساب الزبون:</label>
-                    <input type="url" id="editCustomerAccountLink" required>
-                </div>
-                <div class="form-group">
-                    <label for="editProvince">المحافظة:</label>
-                    <select id="editProvince" required>
-                        <option value="">اختر المحافظة</option>
-                        <option value="بغداد">بغداد</option>
-                        <option value="البصرة">البصرة</option>
-                        <option value="نينوى">نينوى</option>
-                        <option value="كربلاء">كربلاء</option>
-                        <option value="النجف">النجف</option>
-                        <option value="ذي قار">ذي قار</option>
-                        <option value="أربيل">أربيل</option>
-                        <option value="السليمانية">السليمانية</option>
-                        <option value="دهوك">دهوك</option>
-                        <option value="صلاح الدين">صلاح الدين</option>
-                        <option value="الأنبار">الأنبار</option>
-                        <option value="المثنى">المثنى</option>
-                        <option value="القادسية">القادسية</option>
-                        <option value="بابيل">بابيل</option>
-                        <option value="واسط">واسط</option>
-                        <option value="الميسان">الميسان</option>
-                        <option value="كركوك">كركوك</option>
-                        <option value="ديالى">ديالى</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editAddress">العنوان:</label>
-                    <input type="text" id="editAddress" required>
-                </div>
-                <div class="form-group">
-                    <label for="editPhone1">رقم الهاتف الأول:</label>
-                    <input type="tel" id="editPhone1" required>
-                </div>
-                <div class="form-group">
-                    <label for="editPhone2">رقم الهاتف الثاني:</label>
-                    <input type="tel" id="editPhone2">
-                </div>
-                <div class="form-group">
-                    <label for="editTotalPrice">السعر الكلي:</label>
-                    <input type="number" id="editTotalPrice" required>
-                </div>
-                <button type="submit" class="btn btn-primary">تحديث الطلب</button>
-            </form>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
-        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCTC3swHBa7XbC517wQ0uFsj1nSas6yX98",
-            authDomain: "talbvndr.firebaseapp.com",
-            databaseURL: "https://talbvndr-default-rtdb.firebaseio.com",
-            projectId: "talbvndr",
-            storageBucket: "talbvndr.appspot.com",
-            messagingSenderId: "275294740854",
-            appId: "1:275294740854:web:2d4de969f90a6c19f19a57",
-            measurementId: "G-TBFFXTZ70S"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getDatabase(app);
-
-        const ordersContainer = document.getElementById('ordersContainer');
-        const openModalBtn = document.getElementById('openModalBtn');
-        const modal = document.getElementById('myModal');
-        const closeModal = document.querySelector('#myModal .close');
-        const orderForm = document.getElementById('orderForm');
-        const editModal = document.getElementById('editModal');
-        const closeEditModal = document.querySelector('#editModal .close');
-        const editForm = document.getElementById('editForm');
-
-        openModalBtn.addEventListener('click', () => {
-            modal.style.display = 'flex';
-        });
-
-        closeModal.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        closeEditModal.addEventListener('click', () => {
-            editModal.style.display = 'none';
-        });
-
-        orderForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newOrderRef = ref(db, 'orders/' + Date.now());
-            const orderData = {
-                shipmentNumber: document.getElementById('shipmentNumber').value,
-                cartLink: document.getElementById('cartLink').value,
-                customerAccountLink: document.getElementById('customerAccountLink').value,
-                province: document.getElementById('province').value,
-                address: document.getElementById('address').value,
-                phone1: document.getElementById('phone1').value,
-                phone2: document.getElementById('phone2').value,
-                totalPrice: document.getElementById('totalPrice').value,
-                timestamp: new Date().toISOString()
-            };
-            set(newOrderRef, orderData).then(() => {
-                modal.style.display = 'none';
-                orderForm.reset();
-                loadOrders();
-            });
-        });
-
-        window.editOrder = (id) => {
-            const orderRef = ref(db, 'orders/' + id);
-            onValue(orderRef, (snapshot) => {
-                const order = snapshot.val();
-                document.getElementById('editOrderId').value = id;
-                document.getElementById('editShipmentNumber').value = order.shipmentNumber;
-                document.getElementById('editCartLink').value = order.cartLink;
-                document.getElementById('editCustomerAccountLink').value = order.customerAccountLink;
-                document.getElementById('editProvince').value = order.province;
-                document.getElementById('editAddress').value = order.address;
-                document.getElementById('editPhone1').value = order.phone1;
-                document.getElementById('editPhone2').value = order.phone2;
-                document.getElementById('editTotalPrice').value = order.totalPrice;
-                editModal.style.display = 'flex';
-            });
-        };
-
-        window.deleteOrder = (id) => {
-            const orderRef = ref(db, 'orders/' + id);
-            remove(orderRef).then(() => {
-                loadOrders();
-            });
-        };
-
-        editForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editOrderId').value;
-            const updatedOrderData = {
-                shipmentNumber: document.getElementById('editShipmentNumber').value,
-                cartLink: document.getElementById('editCartLink').value,
-                customerAccountLink: document.getElementById('editCustomerAccountLink').value,
-                province: document.getElementById('editProvince').value,
-                address: document.getElementById('editAddress').value,
-                phone1: document.getElementById('editPhone1').value,
-                phone2: document.getElementById('editPhone2').value,
-                totalPrice: document.getElementById('editTotalPrice').value,
-                timestamp: new Date().toISOString()
-            };
-            const orderRef = ref(db, 'orders/' + id);
-            update(orderRef, updatedOrderData).then(() => {
-                editModal.style.display = 'none';
-                editForm.reset();
-                loadOrders();
-            });
-        });
-
-        function loadOrders() {
-            const ordersRef = ref(db, 'orders');
-            onValue(ordersRef, (snapshot) => {
-                const data = snapshot.val();
-                ordersContainer.innerHTML = '';
-                if (data) {
-                    const ordersArray = Object.entries(data).map(([id, order]) => ({ id, ...order }));
-                    ordersArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    ordersArray.forEach(order => {
-                        const orderDiv = document.createElement('div');
-                        orderDiv.className = 'order-item';
-                        orderDiv.innerHTML = `
-                            <p><strong>رقم الشحنة:</strong> ${order.shipmentNumber}</p>
-                            <p><strong>رابط العربة:</strong> <a href="${order.cartLink}" target="_blank">${order.cartLink}</a></p>
-                            <p><strong>رابط حساب الزبون:</strong> <a href="${order.customerAccountLink}" target="_blank">${order.customerAccountLink}</a></p>
-                            <p><strong>المحافظة:</strong> ${order.province}</p>
-                            <p><strong>العنوان:</strong> ${order.address}</p>
-                            <p><strong>رقم الهاتف الأول:</strong> ${order.phone1}</p>
-                            <p><strong>رقم الهاتف الثاني:</strong> ${order.phone2}</p>
-                            <p><strong>السعر الكلي:</strong> ${order.totalPrice}</p>
-                            <p><strong>تاريخ ووقت الإضافة:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
-                            <div class="btn-container">
-                                <button class="btn btn-edit" onclick="editOrder('${order.id}')">تعديل</button>
-                                <button class="btn btn-delete" onclick="deleteOrder('${order.id}')">حذف</button>
-                            </div>
-                        `;
-                        ordersContainer.appendChild(orderDiv);
-                    });
-                }
-            });
-        }
-
-        loadOrders();
-    </script>
 </body>
 </html>
