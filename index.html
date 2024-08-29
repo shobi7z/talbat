@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلبات</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600&display=swap">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 80%;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        #openModalBtn {
+            background-color: #007bff;
+            color: #fff;
+        }
+        #openModalBtn:hover {
+            background-color: #0056b3;
+        }
+        .order-item {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .order-item p {
+            margin: 5px 0;
+        }
+        .btn-container {
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 14px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit {
+            background-color: #007bff;
+        }
+        .btn-edit:hover {
+            background-color: #0056b3;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+        }
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+        .modal .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .modal-content button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>إدارة الطلبات</h1>
+        <button id="openModalBtn">إضافة طلب جديد</button>
+        <div id="ordersContainer"></div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>إضافة طلب جديد</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="shipmentNumber">رقم الشحنة:</label>
+                    <input type="text" id="shipmentNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="cartLink">رابط العربة:</label>
+                    <input type="url" id="cartLink" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerAccountLink">رابط حساب الزبون:</label>
+                    <input type="url" id="customerAccountLink" required>
+                </div>
+                <div class="form-group">
+                    <label for="province">المحافظة:</label>
+                    <select id="province" required>
+                        <option value="">اختر المحافظة</option>
+                        <option value="بغداد">بغداد</option>
+                        <option value="البصرة">البصرة</option>
+                        <option value="نينوى">نينوى</option>
+                        <option value="كربلاء">كربلاء</option>
+                        <option value="النجف">النجف</option>
+                        <option value="ذي قار">ذي قار</option>
+                        <option value="أربيل">أربيل</option>
+                        <option value="السليمانية">السليمانية</option>
+                        <option value="دهوك">دهوك</option>
+                        <option value="صلاح الدين">صلاح الدين</option>
+                        <option value="الأنبار">الأنبار</option>
+                        <option value="المثنى">المثنى</option>
+                        <option value="القادسية">القادسية</option>
+                        <option value="بابيل">بابيل</option>
+                        <option value="واسط">واسط</option>
+                        <option value="الميسان">الميسان</option>
+                        <option value="كركوك">كركوك</option>
+                        <option value="ديالى">ديالى</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="address">العنوان:</label>
+                    <input type="text" id="address" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone1">رقم الهاتف الأول:</label>
+                    <input type="tel" id="phone1" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone2">رقم الهاتف الثاني:</label>
+                    <input type="tel" id="phone2">
+                </div>
+                <div class="form-group">
+                    <label for="totalPrice">السعر الكلي:</label>
+                    <input type="number" id="totalPrice" required>
+                </div>
+                <button type="submit" class="btn btn-primary">إضافة الطلب</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>تعديل الطلب</h2>
+            <form id="editForm">
+                <input type="hidden" id="editOrderId">
+                <div class="form-group">
+                    <label for="editShipmentNumber">رقم الشحنة:</label>
+                    <input type="text" id="editShipmentNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCartLink">رابط العربة:</label>
+                    <input type="url" id="editCartLink" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerAccountLink">رابط حساب الزبون:</label>
+                    <input type="url" id="editCustomerAccountLink" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProvince">المحافظة:</label>
+                    <select id="editProvince" required>
+                        <option value="">اختر المحافظة</option>
+                        <option value="بغداد">بغداد</option>
+                        <option value="البصرة">البصرة</option>
+                        <option value="نينوى">نينوى</option>
+                        <option value="كربلاء">كربلاء</option>
+                        <option value="النجف">النجف</option>
+                        <option value="ذي قار">ذي قار</option>
+                        <option value="أربيل">أربيل</option>
+                        <option value="السليمانية">السليمانية</option>
+                        <option value="دهوك">دهوك</option>
+                        <option value="صلاح الدين">صلاح الدين</option>
+                        <option value="الأنبار">الأنبار</option>
+                        <option value="المثنى">المثنى</option>
+                        <option value="القادسية">القادسية</option>
+                        <option value="بابيل">بابيل</option>
+                        <option value="واسط">واسط</option>
+                        <option value="الميسان">الميسان</option>
+                        <option value="كركوك">كركوك</option>
+                        <option value="ديالى">ديالى</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">العنوان:</label>
+                    <input type="text" id="editAddress" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone1">رقم الهاتف الأول:</label>
+                    <input type="tel" id="editPhone1" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone2">رقم الهاتف الثاني:</label>
+                    <input type="tel" id="editPhone2">
+                </div>
+                <div class="form-group">
+                    <label for="editTotalPrice">السعر الكلي:</label>
+                    <input type="number" id="editTotalPrice" required>
+                </div>
+                <button type="submit" class="btn btn-primary">تحديث الطلب</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTC3swHBa7XbC517wQ0uFsj1nSas6yX98",
+            authDomain: "talbvndr.firebaseapp.com",
+            databaseURL: "https://talbvndr-default-rtdb.firebaseio.com",
+            projectId: "talbvndr",
+            storageBucket: "talbvndr.appspot.com",
+            messagingSenderId: "275294740854",
+            appId: "1:275294740854:web:2d4de969f90a6c19f19a57",
+            measurementId: "G-TBFFXTZ70S"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+
+        const ordersContainer = document.getElementById('ordersContainer');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const modal = document.getElementById('myModal');
+        const closeModal = document.querySelector('#myModal .close');
+        const orderForm = document.getElementById('orderForm');
+        const editModal = document.getElementById('editModal');
+        const closeEditModal = document.querySelector('#editModal .close');
+        const editForm = document.getElementById('editForm');
+
+        openModalBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        closeEditModal.addEventListener('click', () => {
+            editModal.style.display = 'none';
+        });
+
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newOrderRef = ref(db, 'orders/' + Date.now());
+            const orderData = {
+                shipmentNumber: document.getElementById('shipmentNumber').value,
+                cartLink: document.getElementById('cartLink').value,
+                customerAccountLink: document.getElementById('customerAccountLink').value,
+                province: document.getElementById('province').value,
+                address: document.getElementById('address').value,
+                phone1: document.getElementById('phone1').value,
+                phone2: document.getElementById('phone2').value,
+                totalPrice: document.getElementById('totalPrice').value,
+                timestamp: new Date().toISOString()
+            };
+            set(newOrderRef, orderData).then(() => {
+                modal.style.display = 'none';
+                orderForm.reset();
+                loadOrders();
+            });
+        });
+
+        window.editOrder = (id) => {
+            const orderRef = ref(db, 'orders/' + id);
+            onValue(orderRef, (snapshot) => {
+                const order = snapshot.val();
+                document.getElementById('editOrderId').value = id;
+                document.getElementById('editShipmentNumber').value = order.shipmentNumber;
+                document.getElementById('editCartLink').value = order.cartLink;
+                document.getElementById('editCustomerAccountLink').value = order.customerAccountLink;
+                document.getElementById('editProvince').value = order.province;
+                document.getElementById('editAddress').value = order.address;
+                document.getElementById('editPhone1').value = order.phone1;
+                document.getElementById('editPhone2').value = order.phone2;
+                document.getElementById('editTotalPrice').value = order.totalPrice;
+                editModal.style.display = 'flex';
+            });
+        };
+
+        window.deleteOrder = (id) => {
+            const orderRef = ref(db, 'orders/' + id);
+            remove(orderRef).then(() => {
+                loadOrders();
+            });
+        };
+
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editOrderId').value;
+            const updatedOrderData = {
+                shipmentNumber: document.getElementById('editShipmentNumber').value,
+                cartLink: document.getElementById('editCartLink').value,
+                customerAccountLink: document.getElementById('editCustomerAccountLink').value,
+                province: document.getElementById('editProvince').value,
+                address: document.getElementById('editAddress').value,
+                phone1: document.getElementById('editPhone1').value,
+                phone2: document.getElementById('editPhone2').value,
+                totalPrice: document.getElementById('editTotalPrice').value,
+                timestamp: new Date().toISOString()
+            };
+            const orderRef = ref(db, 'orders/' + id);
+            update(orderRef, updatedOrderData).then(() => {
+                editModal.style.display = 'none';
+                editForm.reset();
+                loadOrders();
+            });
+        });
+
+        function loadOrders() {
+            const ordersRef = ref(db, 'orders');
+            onValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                ordersContainer.innerHTML = '';
+                if (data) {
+                    const ordersArray = Object.entries(data).map(([id, order]) => ({ id, ...order }));
+                    ordersArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    ordersArray.forEach(order => {
+                        const orderDiv = document.createElement('div');
+                        orderDiv.className = 'order-item';
+                        orderDiv.innerHTML = `
+                            <p><strong>رقم الشحنة:</strong> ${order.shipmentNumber}</p>
+                            <p><strong>رابط العربة:</strong> <a href="${order.cartLink}" target="_blank">${order.cartLink}</a></p>
+                            <p><strong>رابط حساب الزبون:</strong> <a href="${order.customerAccountLink}" target="_blank">${order.customerAccountLink}</a></p>
+                            <p><strong>المحافظة:</strong> ${order.province}</p>
+                            <p><strong>العنوان:</strong> ${order.address}</p>
+                            <p><strong>رقم الهاتف الأول:</strong> ${order.phone1}</p>
+                            <p><strong>رقم الهاتف الثاني:</strong> ${order.phone2}</p>
+                            <p><strong>السعر الكلي:</strong> ${order.totalPrice}</p>
+                            <p><strong>تاريخ ووقت الإضافة:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                            <div class="btn-container">
+                                <button class="btn btn-edit" onclick="editOrder('${order.id}')">تعديل</button>
+                                <button class="btn btn-delete" onclick="deleteOrder('${order.id}')">حذف</button>
+                            </div>
+                        `;
+                        ordersContainer.appendChild(orderDiv);
+                    });
+                }
+            });
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>
