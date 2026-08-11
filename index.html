@@ -1,224 +1,421 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> إدخال المنتجات المكررة</title>
-    <!-- تضمين خط Cairo -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- Firebase Configuration -->
-    <script type="module">
-        // استيراد وحدات Firebase
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
-
-        // إعداد Firebase - يجب عليك استبدال هذه المعلومات بمعلومات مشروعك الخاص
-        const firebaseConfig = {
-  apiKey: "AIzaSyA8REbmJrO7jRXhWiKYzUY5fEKUbwu0Q7c",
-  authDomain: "dupeel.firebaseapp.com",
-  databaseURL: "https://dupeel-default-rtdb.firebaseio.com",
-  projectId: "dupeel",
-  storageBucket: "dupeel.appspot.com",
-  messagingSenderId: "887640383214",
-  appId: "1:887640383214:web:6fad12ebbc4ca311519dff",
-  measurementId: "G-KFRJ2VZ3QH"
-        };
-
-        // تهيئة Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // دالة لإضافة الشحنة إلى Firestore
-        function addShipment(event) {
-            event.preventDefault(); // منع إعادة تحميل الصفحة
-
-            const trackingNumber = document.getElementById('trackingNumber').value;
-            const products = [];
-
-            for (let i = 1; i <= 10; i++) {
-                const productLink = document.getElementById(`productLink${i}`).value;
-                const quantity = document.getElementById(`quantity${i}`).value;
-                if (productLink && quantity) {
-                    products.push({ link: productLink, quantity: parseInt(quantity) });
-                }
-            }
-
-            // إضافة البيانات إلى Firestore
-            addDoc(collection(db, "shipments"), {
-                trackingNumber: trackingNumber,
-                products: products,
-                createdAt: serverTimestamp()
-            })
-            .then(() => {
-                alert('تم إضافة الشحنة بنجاح!');
-                document.querySelector('form').reset(); // إعادة تعيين النموذج بعد الإضافة
-            })
-            .catch(error => {
-                console.error('خطأ في إضافة الشحنة: ', error);
-            });
-        }
-        
-        // ربط دالة إضافة الشحنة بالنموذج عند تحميل الصفحة
-        window.onload = function() {
-            document.querySelector('form').onsubmit = addShipment;
-        };
-    </script>
+    <title>لوحة الإدارة - نظام الدورات</title>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
         }
-        .container {
-            max-width: 700px;
-            margin: 30px auto;
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
         }
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 600;
-        }
-        input[type="text"],
-        input[type="number"] {
-            width: calc(100% - 16px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus,
-        input[type="number"]:focus {
-            border-color: #4CAF50;
-        }
-        button {
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
-            background-color: #4CAF50;
-            color: white;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .login-box input {
+            width: 100%;
             padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .dashboard {
+            display: none;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            font-weight: 700;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .students-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .total-count {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2> المنتجات المكررة​</h2>
-        <form>
-            <!-- خانة إدخال رقم الشحنة -->
-            <div class="form-group">
-                <label for="trackingNumber">رقم الشحنة</label>
-                <input type="text" id="trackingNumber" name="trackingNumber" required>
+    <!-- صفحة تسجيل الدخول -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h2>🔐 تسجيل دخول الإدارة</h2>
+            <div id="loginError" class="error-message">
+                ❌ البريد الإلكتروني أو كلمة المرور غير صحيحة
             </div>
-
-            <!-- خانات إدخال الروابط والكميات للمنتجات -->
-            <!-- المنتج 1 -->
-            <div class="form-group">
-                <label for="productLink1">رابط المنتج الأول</label>
-                <input type="text" id="productLink1" name="productLink1">
-                <label for="quantity1">الكمية</label>
-                <input type="number" id="quantity1" name="quantity1" min="0">
-            </div>
-
-            <!-- المنتج 2 -->
-            <div class="form-group">
-                <label for="productLink2">رابط المنتج الثاني</label>
-                <input type="text" id="productLink2" name="productLink2">
-                <label for="quantity2">الكمية</label>
-                <input type="number" id="quantity2" name="quantity2" min="0">
-            </div>
-
-            <!-- المنتج 3 -->
-            <div class="form-group">
-                <label for="productLink3">رابط المنتج الثالث</label>
-                <input type="text" id="productLink3" name="productLink3">
-                <label for="quantity3">الكمية</label>
-                <input type="number" id="quantity3" name="quantity3" min="0">
-            </div>
-
-            <!-- المنتج 4 -->
-            <div class="form-group">
-                <label for="productLink4">رابط المنتج الرابع</label>
-                <input type="text" id="productLink4" name="productLink4">
-                <label for="quantity4">الكمية</label>
-                <input type="number" id="quantity4" name="quantity4" min="0">
-            </div>
-
-            <!-- المنتج 5 -->
-            <div class="form-group">
-                <label for="productLink5">رابط المنتج الخامس</label>
-                <input type="text" id="productLink5" name="productLink5">
-                <label for="quantity5">الكمية</label>
-                <input type="number" id="quantity5" name="quantity5" min="0">
-            </div>
-
-            <!-- المنتج 6 -->
-            <div class="form-group">
-                <label for="productLink6">رابط المنتج السادس</label>
-                <input type="text" id="productLink6" name="productLink6">
-                <label for="quantity6">الكمية</label>
-                <input type="number" id="quantity6" name="quantity6" min="0">
-            </div>
-
-            <!-- المنتج 7 -->
-            <div class="form-group">
-                <label for="productLink7">رابط المنتج السابع</label>
-                <input type="text" id="productLink7" name="productLink7">
-                <label for="quantity7">الكمية</label>
-                <input type="number" id="quantity7" name="quantity7" min="0">
-            </div>
-
-            <!-- المنتج 8 -->
-            <div class="form-group">
-                <label for="productLink8">رابط المنتج الثامن</label>
-                <input type="text" id="productLink8" name="productLink8">
-                <label for="quantity8">الكمية</label>
-                <input type="number" id="quantity8" name="quantity8" min="0">
-            </div>
-
-            <!-- المنتج 9 -->
-            <div class="form-group">
-                <label for="productLink9">رابط المنتج التاسع</label>
-                <input type="text" id="productLink9" name="productLink9">
-                <label for="quantity9">الكمية</label>
-                <input type="number" id="quantity9" name="quantity9" min="0">
-            </div>
-
-            <!-- المنتج 10 -->
-            <div class="form-group">
-                <label for="productLink10">رابط المنتج العاشر</label>
-                <input type="text" id="productLink10" name="productLink10">
-                <label for="quantity10">الكمية</label>
-                <input type="number" id="quantity10" name="quantity10" min="0">
-            </div>
-
-            <!-- زر إرسال النموذج -->
-            <button type="submit">إرسال</button>
-        </form>
+            <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+            <input type="password" id="password" placeholder="كلمة المرور" required>
+            <button onclick="login()">دخول</button>
+        </div>
     </div>
+
+    <!-- لوحة التحكم -->
+    <div id="dashboard" class="dashboard">
+        <div class="header">
+            <h1>📊 لوحة تحكم الإدارة</h1>
+            <button class="logout-btn" onclick="logout()">🚪 تسجيل خروج</button>
+        </div>
+
+        <div class="total-count">
+            إجمالي الطلاب المسجلين: <span id="totalCount">0</span>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>🔍 بحث بالاسم</label>
+                <input type="text" id="searchName" placeholder="ابحث باسم الطالب..." 
+                       oninput="applyFilters()">
+            </div>
+
+            <div class="filter-group">
+                <label>🏛️ تصفية حسب الجامعة</label>
+                <select id="filterUniversity" onchange="applyFilters()">
+                    <option value="">جميع الجامعات</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>📖 تصفية حسب المرحلة</label>
+                <select id="filterStage" onchange="applyFilters()">
+                    <option value="">جميع المراحل</option>
+                    <option value="الثالثة">المرحلة الثالثة</option>
+                    <option value="الرابعة">المرحلة الرابعة</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="students-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم الثلاثي</th>
+                        <th>المرحلة</th>
+                        <th>المادة</th>
+                        <th>رقم الهاتف</th>
+                        <th>الجامعة</th>
+                        <th>معرف التليجرام</th>
+                        <th>تاريخ التسجيل</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr>
+                        <td colspan="8" class="no-data">جاري تحميل البيانات...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXQ1JZMEaFlxGtyB_sdq1Sp7Cu-TrlK10",
+            authDomain: "dorat-bd958.firebaseapp.com",
+            databaseURL: "https://dorat-bd958-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "dorat-bd958",
+            storageBucket: "dorat-bd958.firebasestorage.app",
+            messagingSenderId: "1064812019462",
+            appId: "1:1064812019462:web:af2e5d53c5744140b22887",
+            measurementId: "G-14FDEJHXHL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        let allStudents = [];
+        let currentUser = null;
+
+        // مراقبة حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadStudents();
+            } else {
+                currentUser = null;
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+
+        // تسجيل الدخول
+        window.login = function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('loginError').textContent = '❌ يرجى إدخال البريد الإلكتروني وكلمة المرور';
+                return;
+            }
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    document.getElementById('loginError').style.display = 'none';
+                })
+                .catch((error) => {
+                    document.getElementById('loginError').style.display = 'block';
+                    document.getElementById('loginError').textContent = '❌ ' + getErrorMessage(error.code);
+                });
+        };
+
+        // تسجيل الخروج
+        window.logout = function() {
+            signOut(auth).then(() => {
+                allStudents = [];
+            });
+        };
+
+        // تحميل بيانات الطلاب
+        function loadStudents() {
+            const studentsRef = ref(database, 'students');
+            const studentsQuery = query(studentsRef, orderByChild('registrationDate'));
+            
+            onValue(studentsQuery, (snapshot) => {
+                allStudents = [];
+                const students = snapshot.val();
+                
+                if (students) {
+                    Object.keys(students).forEach((key) => {
+                        allStudents.push({
+                            id: key,
+                            ...students[key]
+                        });
+                    });
+                    
+                    // ترتيب عكسي حسب تاريخ التسجيل
+                    allStudents.reverse();
+                    
+                    updateUniversityFilter();
+                    displayStudents(allStudents);
+                    document.getElementById('totalCount').textContent = allStudents.length;
+                } else {
+                    displayStudents([]);
+                    document.getElementById('totalCount').textContent = '0';
+                }
+            });
+        }
+
+        // تحديث قائمة الجامعات في الفلتر
+        function updateUniversityFilter() {
+            const universities = [...new Set(allStudents.map(s => s.university))].sort();
+            const select = document.getElementById('filterUniversity');
+            select.innerHTML = '<option value="">جميع الجامعات</option>';
+            universities.forEach(uni => {
+                select.innerHTML += `<option value="${uni}">${uni}</option>`;
+            });
+        }
+
+        // تطبيق الفلاتر
+        window.applyFilters = function() {
+            const searchTerm = document.getElementById('searchName').value.toLowerCase();
+            const universityFilter = document.getElementById('filterUniversity').value;
+            const stageFilter = document.getElementById('filterStage').value;
+
+            const filtered = allStudents.filter(student => {
+                const nameMatch = !searchTerm || student.fullName.toLowerCase().includes(searchTerm);
+                const universityMatch = !universityFilter || student.university === universityFilter;
+                const stageMatch = !stageFilter || student.stage === stageFilter;
+                return nameMatch && universityMatch && stageMatch;
+            });
+
+            displayStudents(filtered);
+        };
+
+        // عرض بيانات الطلاب
+        function displayStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data">لا توجد بيانات متطابقة</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = students.map((student, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${student.fullName || '-'}</td>
+                    <td>${student.stage || '-'}</td>
+                    <td>${student.material || '-'}</td>
+                    <td>${student.phone || '-'}</td>
+                    <td>${student.university || '-'}</td>
+                    <td>${student.telegram || '-'}</td>
+                    <td>${student.registrationDate || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ترجمة رسائل الخطأ
+        function getErrorMessage(code) {
+            const messages = {
+                'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+                'auth/user-disabled': 'تم تعطيل هذا الحساب',
+                'auth/user-not-found': 'المستخدم غير موجود',
+                'auth/wrong-password': 'كلمة المرور غير صحيحة',
+                'auth/invalid-credential': 'بيانات الدخول غير صحيحة'
+            };
+            return messages[code] || 'حدث خطأ في تسجيل الدخول';
+        }
+
+        // دعم زر Enter لتسجيل الدخول
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !currentUser) {
+                login();
+            }
+        });
+    </script>
 </body>
 </html>
